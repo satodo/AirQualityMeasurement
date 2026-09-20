@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Air quality measurement</title>
+</head>
+<body>
+
+<h1>Air quality measurement</h1>
+
+<section id="result" hidden>
+  <p>eCO2: <span id="co2"></span> ppm</p>
+  <p>TVOC: <span id="tvoc"></span> ppb</p>
+
+  <h2>Is it okay to breathe?</h2>
+  <table border="1" cellpadding="8" style="width:100%">
+    <tr align="center">
+      <td id="t0">Okay to breathe for someone with asthma</td>
+      <td id="t1">Fair</td>
+      <td id="t2">Poor</td>
+      <td id="t3">Not okay to breathe right now</td>
+    </tr>
+    <tr align="center">
+      <td id="m0">&nbsp;</td>
+      <td id="m1">&nbsp;</td>
+      <td id="m2">&nbsp;</td>
+      <td id="m3">&nbsp;</td>
+    </tr>
+  </table>
+  <p>Result: <span id="verdict"></span></p>
+</section>
+
+<p id="none" hidden>No reading in this link. Tap the card on the sensor, then tap your phone on the card.</p>
+
+<p><small>This is a rough guide from a low-cost CCS811 sensor. It estimates CO2 from VOCs and does not measure particles, ozone or other common asthma triggers, so it is not medical advice. If you have trouble breathing, follow your asthma action plan.</small></p>
+
+<script>
+(function () {
+  var params = new URLSearchParams(location.search);
+
+  function num(key) {
+    var raw = params.get(key);
+    if (raw === null || raw.trim() === '') return null;
+    var n = Number(raw);
+    return isFinite(n) && n >= 0 && n <= 65535 ? Math.round(n) : null;
+  }
+
+  function level(value, limits) {
+    if (value < limits[0]) return 0;
+    if (value < limits[1]) return 1;
+    if (value < limits[2]) return 2;
+    return 3;
+  }
+
+  var names = [
+    'Okay to breathe for someone with asthma',
+    'Fair',
+    'Poor',
+    'Not okay to breathe right now'
+  ];
+
+  var co2 = num('c');
+  var tvoc = num('v');
+
+  if (co2 === null && tvoc === null) {
+    document.getElementById('none').hidden = false;
+    return;
+  }
+
+  var worst = 0;
+  if (co2 !== null) {
+    document.getElementById('co2').textContent = co2;
+    worst = Math.max(worst, level(co2, [800, 1200, 2000]));
+  } else {
+    document.getElementById('co2').textContent = 'no reading';
+  }
+  if (tvoc !== null) {
+    document.getElementById('tvoc').textContent = tvoc;
+    worst = Math.max(worst, level(tvoc, [220, 660, 2200]));
+  } else {
+    document.getElementById('tvoc').textContent = 'no reading';
+  }
+
+  document.getElementById('m' + worst).textContent = '\u25B2';
+  document.getElementById('t' + worst).style.fontWeight = 'bold';
+  document.getElementById('verdict').textContent = names[worst];
+  document.getElementById('result').hidden = false;
+})();
+</script>
+
+</body>
+</html>
