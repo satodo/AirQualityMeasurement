@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Air quality measurement</title>
+<style>
+  body { transition: background-color 0.4s ease; }
+</style>
 </head>
 <body>
 
@@ -14,7 +17,7 @@
   <p>TVOC: <span id="tvoc"></span> ppb</p>
 
   <h2>Is it okay to breathe?</h2>
-  <table border="1" cellpadding="8" style="width:100%">
+  <table border="1" cellpadding="8" style="width:100%; border-collapse:collapse">
     <tr align="center">
       <td id="t0">Okay to breathe for someone with asthma</td>
       <td id="t1">Fair</td>
@@ -33,11 +36,19 @@
 
 <p id="none" hidden>No reading in this link. Tap the card on the sensor, then tap your phone on the card.</p>
 
+<hr>
+
+<h2>What do these readings mean?</h2>
+<p><b>eCO2</b> stands for "equivalent CO2". The sensor can't measure carbon dioxide directly, so it estimates it from other gases in the air. A normal room is usually around 400-800 ppm. Higher numbers mean the air is more stale, often because a space isn't well ventilated or has more people breathing in it.</p>
+<p><b>TVOC</b> stands for "total volatile organic compounds". These are gases that come off things like cleaning products, paint, traffic fumes, perfume, and even alcohol. A low number means the air is relatively clean of these. A high number means something nearby is releasing more of these gases than usual.</p>
+
 <p><small>This is a rough guide from a low-cost CCS811 sensor. It estimates CO2 from VOCs and does not measure particles, ozone or other common asthma triggers, so it is not medical advice. If you have trouble breathing, follow your asthma action plan.</small></p>
 
 <script>
 (function () {
   var params = new URLSearchParams(location.search);
+
+  var bgColors = ['#E2F2E2', '#F6F2D2', '#F6E4D2', '#F3DADA'];
 
   function num(key) {
     var raw = params.get(key);
@@ -86,6 +97,7 @@
   document.getElementById('t' + worst).style.fontWeight = 'bold';
   document.getElementById('verdict').textContent = names[worst];
   document.getElementById('result').hidden = false;
+  document.body.style.backgroundColor = bgColors[worst];
 })();
 </script>
 
